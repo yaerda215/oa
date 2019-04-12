@@ -36,6 +36,7 @@
 
 
 <script>
+	import { getUserList,submitChange } from '../api/api';
 	export default {
 		data() {
 			return {
@@ -56,13 +57,48 @@
 		},
 		created() {
 			//调取用户信息接口
+			this.getUserInfo()
 		},
 		methods: {
 			onSubmit() {
-				console.log('submit!');
+				var mobileReg = new RegExp("^(13+\d{9})|(159+\d{8})|(153+\d{8})$");
+				var emailReg = new RegExp("^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$");
+				if(!mobileReg.test(this.form.phone)){ 
+					//手机验证
+					alert("手机号码输入有误!");
+					return false;
+				} else if (!emailReg.test(this.form.email)) {
+					//邮箱验证
+					alert("邮箱地址输入有误!");
+					return false;
+				} else {
+					const obj = {
+						phone: this.form.phone,
+						email: this.form.email
+					}
+					submitChange(obj).then(data => {
+					if(data.success) {
+						this.$message({
+							message: '修改成功！',
+          		type: 'success'
+						})
+					} else {
+						this.$message({
+							message: '修改失败！',
+          		type: 'error'
+						})
+					}
+				})
+				}
+			},
+			getUserInfo() {
+				getUserList(this.$store.getters.getuname).then((res) => {
+					this.form = res.data
+				})
 			},
 			reset() {
 				//重新调取用户信息接口
+				this.getUserInfo()
 			}
 		}
 	}

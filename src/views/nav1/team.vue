@@ -10,7 +10,7 @@
 					<el-input v-model="filters.area" size="small" placeholder="区队"></el-input>
 				</el-form-item>
 				<el-form-item>
-					<el-button type="primary" size="small" @click="getUsers">查询</el-button>
+					<el-button type="primary" size="small" @click="getUsersList">查询</el-button>
 				</el-form-item>
 				<el-form-item v-if="ifAdmin">
 					<el-button type="primary" size="small" @click="handleEdit">新增</el-button>
@@ -36,11 +36,21 @@
 			</el-table-column>
 			<el-table-column label="操作" width="160" v-if="ifAdmin">
 				<template scope="scope">
-					<el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-					<el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
+					<el-button size="small" @click="handleEdit(scope)">编辑</el-button>
+					<el-button type="danger" size="small" @click="handleDel(scope)">删除</el-button>
 				</template>
 			</el-table-column>
 		</el-table>
+		<!-- 分页工具 -->
+		<el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="pageIndex"
+      :page-sizes="[10, 20, 30, 40]"
+      :page-size="20"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="pageTotal">
+    </el-pagination>
 
 		<!--翻页工具条-->
 		<el-col :span="24" class="toolbar" v-if="users.length>0">
@@ -104,8 +114,6 @@
 	//import NProgress from 'nprogress'
 	import { getUserListPage, removeUser, batchRemoveUser, editUser, addUser } from '../../api/api';
 
- //获取登录人信息
- //this.$store.getters.appInfo.userId
 	export default {
 		data() {
 			return {
@@ -124,8 +132,8 @@
 				//对话框标题
 				dialogTitle: '',
 				users: [],
-				total: 0,
-				page: 1,
+				pageTotal: 0,
+				pageIndex: 1,
 				listLoading: false,
 				sels: [],//列表选中列
 				editFormVisible: false,//编辑界面是否显示
@@ -169,41 +177,54 @@
 				return row.gender == 1 ? '男' : row.gender == 0 ? '女' : '未知';
 			},
 			handleCurrentChange(val) {
-				this.page = val;
-				this.getUsers();
+				this.pageIndex = val;
+				this.getUsersList();
+			},
+			handleSizeChange(val) {
+				this.pageSize = val
+				this.getUsersList()
 			},
 			//获取用户列表
-			getUsers() {
-				let para = {
-					page: this.page,
+			getUsersList() {
+				let param = {
+					page: this.pageIndex,
+					pageSize: this.pageSize,
 					name: this.filters.name,
 					team: this.filters.area
 				};
 				this.listLoading = true;
 				//NProgress.start();
-				getUserListPage(para).then((res) => {
-					this.total = res.data.total;
+				getUserListPage(param).then((res) => {
+					this.pageTotal = res.data.total;
 					this.users = res.data.users;
 					this.listLoading = false;
-					//NProgress.done();
 				});
 			},
 			//删除
-			handleDel: function (index, row) {
+			handleDel(row) {
 				this.$confirm('确认删除该记录吗?', '提示', {
 					type: 'warning'
 				}).then(() => {
 					this.listLoading = true;
 					//NProgress.start();
-					let para = { id: row.id };
-					removeUser(para).then((res) => {
+					let param = { 
+						id: row.id 
+					};
+					removeInfo(param).then((res) => {
 						this.listLoading = false;
 						//NProgress.done();
-						this.$message({
-							message: '删除成功',
-							type: 'success'
-						});
-						this.getUsers();
+						if(res.success) {
+							this.$message({
+								message: '删除成功',
+								type: 'success'
+							})
+						}else{
+							this.$message({
+								message: '删除失败',
+								type: 'error'
+							})
+						}
+						this.getUsersList();
 					});
 				}).catch(() => {
 
@@ -250,7 +271,7 @@
 								});
 								this.$refs['editForm'].resetFields();
 								this.editFormVisible = false;
-								this.getUsers();
+								this.getUsersList();
 							});
 						});
 					}
@@ -275,7 +296,7 @@
 							message: '删除成功',
 							type: 'success'
 						});
-						this.getUsers();
+						this.getUsersList();
 					});
 				}).catch(() => {
 
@@ -283,7 +304,7 @@
 			}
 		},
 		mounted() {
-			this.getUsers();
+			this.getUsersList();
 		}
 	}
 

@@ -6,3 +6,7 @@ export const getCount = state => {
 export const userInfo = state => {
   return state.user.userInfo
 }
+
+export const getuname = state => {
+  return state.account
+}

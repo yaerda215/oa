@@ -10,7 +10,7 @@
       </el-form-item>
       <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
       <el-form-item style="width:100%;">
-        <el-button type="primary" style="width:45%;" @click.native.prevent="handleSubmit2" :loading="logining">登录</el-button>
+        <el-button type="primary" style="width:45%;" @click.native.prevent="handleLogin" :loading="logining">登录</el-button>
         <el-button type="primary" style="width:45%;" @click.native.prevent="handleResgiter">注册</el-button>
         <!--<el-button @click.native.prevent="handleReset2">重置</el-button>-->
       </el-form-item>
@@ -24,11 +24,11 @@
   export default {
     data() {
       return {
-        // backgroundDiv: {
+        backgroundDiv: {
         // backgroundImage:'url(' + require('../../static/background2.jpg') + ')',
         // backgroundRepeat:'no-repeat',
         // backgroundSize:'100% 100%'
-        // },
+        },
         logining: false,
         ruleForm2: {
           account: 'admin',
@@ -52,7 +52,7 @@
       handleReset2() {
         this.$refs.ruleForm2.resetFields();
       },
-      handleSubmit2(ev) {
+      handleLogin(ev) {
         var _this = this;
         this.$refs.ruleForm2.validate((valid) => {
           if (valid) {
@@ -74,6 +74,7 @@
                 });
               } else {
                 sessionStorage.setItem('user', JSON.stringify(user));
+                this.$store.dispatch('setAccount',user);
                 this.$router.push({ path: '/userInformation' });
               }
             });

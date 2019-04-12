@@ -17,7 +17,10 @@ const mutations = {
     },
     DECREMENT(state) {
         state.count--
-    }
+    },
+    SET_ACCOUNT (state, platform) {
+        state.account = platform;
+    },
 }
 
 // 创建 store 实例

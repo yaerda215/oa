@@ -36,11 +36,11 @@
     data() {
       return {
         logining: false,
-        // backgroundDiv: {
+        backgroundDiv: {
         // backgroundImage:'url(' + require('../../static/background1.jpg') + ')',
         // backgroundRepeat:'no-repeat',
         // backgroundSize:'100% 100%'
-        // },
+        },
         ruleForm2: {
           account: '',
           name: '',
@@ -51,6 +51,7 @@
         },
         rules2: {
           account: [
+            // 账号7位长度
             { required: true, message: '请输入账号', trigger: 'blur' },
             //{ validator: validaePass }
           ],
@@ -95,7 +96,7 @@
             requestRegister(loginParams).then(data => {
               this.logining = false;
               //NProgress.done();
-              let { msg, code, user } = data;
+              let { msg, code } = data;
               if (code !== 200) {
                 this.$message({
                   message: msg,
@@ -103,7 +104,6 @@
                 });
                 this.handleReset()
               } else {
-                // sessionStorage.setItem('user', JSON.stringify(user));
                 this.$router.push({ path: '/login' });
               }
             });
